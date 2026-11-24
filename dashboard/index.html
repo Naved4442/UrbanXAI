@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UrbanXAI Dashboard</title>
+<style>
+:root {
+  --bg: #EBEBD8;
+  --surface: #F4F4E6;
+  --surface-2: #E3E3CC;
+  --forest: #455230;
+  --olive: #637545;
+  --sage: #9BA685;
+  --ink: #2B3520;
+  --muted: #566545;
+  --border: rgba(69,82,48,.18);
+  --shadow: 0 1px 2px rgba(43,53,32,.06), 0 8px 24px rgba(43,53,32,.08);
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: Inter, "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+  line-height: 1.55; -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 1240px; margin: 0 auto; padding: 40px 24px 64px; }
+
+header {
+  background: var(--forest); color: var(--bg); border-radius: 24px; padding: 40px 40px 34px;
+  margin-bottom: 36px; position: relative; overflow: hidden; box-shadow: var(--shadow);
+}
+header::before, header::after { content: ""; position: absolute; border-radius: 50%; pointer-events: none; }
+header::before { width: 380px; height: 380px; right: -110px; top: -150px; background: var(--olive); opacity: .55; }
+header::after  { width: 220px; height: 220px; right: 140px; bottom: -130px; background: var(--sage); opacity: .35; }
+header > * { position: relative; z-index: 1; }
+.eyebrow {
+  display: inline-block; font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--bg); background: rgba(235,235,216,.12); border: 1px solid rgba(235,235,216,.3);
+  padding: 5px 12px; border-radius: 999px; margin-bottom: 16px;
+}
+h1 { margin: 0 0 10px; font-size: clamp(28px, 4.2vw, 44px); line-height: 1.12; letter-spacing: -.02em; max-width: 880px; }
+h1 .accent { color: var(--sage); }
+.sub { color: rgba(235,235,216,.85); font-size: 16px; margin: 0 0 20px; max-width: 720px; }
+.tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.tag { font-size: 13px; color: var(--bg); background: rgba(235,235,216,.1); border: 1px solid rgba(235,235,216,.28); padding: 6px 12px; border-radius: 8px; }
+
+h2 {
+  font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--forest);
+  margin: 44px 0 16px; display: flex; align-items: center; gap: 12px; font-weight: 700;
+}
+h2::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap: 16px; }
+.card {
+  position: relative; overflow: hidden; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 16px; padding: 20px 20px 18px 24px;
+  box-shadow: var(--shadow); transition: transform .2s ease, box-shadow .2s ease;
+}
+.card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--accent, var(--olive)); }
+.card:hover { transform: translateY(-3px); box-shadow: 0 2px 4px rgba(43,53,32,.08), 0 14px 30px rgba(43,53,32,.14); }
+.label { color: var(--muted); font-size: 13px; font-weight: 600; }
+.value { font-size: 34px; font-weight: 800; letter-spacing: -.02em; margin: 6px 0 4px; color: var(--forest); font-variant-numeric: tabular-nums; }
+.card small { color: var(--muted); font-size: 12.5px; }
+.c-forest { --accent: var(--forest); }
+.c-olive  { --accent: var(--olive); }
+.c-sage   { --accent: var(--sage); }
+.card.feature { background: var(--olive); border-color: transparent; }
+.card.feature::before { background: var(--bg); }
+.card.feature .label, .card.feature small { color: #F4F4E6; }
+.card.feature .value { color: #fff; }
+
+.frame { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow); }
+.frame-bar { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: var(--surface-2); border-bottom: 1px solid var(--border); font-size: 12.5px; color: var(--muted); }
+.dot { width: 10px; height: 10px; border-radius: 50%; }
+.dot:nth-child(1) { background: var(--forest); } .dot:nth-child(2) { background: var(--olive); } .dot:nth-child(3) { background: var(--sage); }
+.frame-bar span { margin-left: 8px; }
+iframe { display: block; width: 100%; height: 900px; border: 0; background: var(--surface); }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--bg);
+  background: var(--forest); font-weight: 600; padding: 13px 22px; border-radius: 12px;
+  box-shadow: var(--shadow); transition: transform .15s ease, background .15s ease;
+}
+.btn:hover { transform: translateY(-2px); background: var(--olive); }
+.btn:focus-visible, .chips a:focus-visible { outline: 3px solid var(--olive); outline-offset: 2px; }
+
+.groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.group { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 18px 20px; box-shadow: var(--shadow); }
+.group h3 { margin: 0 0 12px; font-size: 15px; color: var(--forest); display: flex; align-items: center; gap: 10px; }
+.group h3 i { width: 10px; height: 10px; border-radius: 3px; background: var(--accent, var(--olive)); display: inline-block; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chips a { font-size: 13px; color: var(--forest); text-decoration: none; background: var(--bg); border: 1px solid var(--sage); padding: 7px 12px; border-radius: 8px; transition: all .15s ease; }
+.chips a:hover { background: var(--forest); color: var(--bg); border-color: var(--forest); }
+
+.note { margin-top: 44px; padding: 16px 20px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--sage); border-left: 5px solid var(--olive); color: var(--ink); font-size: 14px; }
+.note b { color: var(--forest); }
+footer { margin-top: 32px; color: var(--muted); font-size: 12.5px; text-align: center; }
+
+@media (max-width: 600px) {
+  .wrap { padding: 24px 14px 48px; }
+  header { padding: 28px 22px 24px; border-radius: 18px; }
+  iframe { height: 700px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <span class="eyebrow">Explainable AI &middot; Remote Sensing</span>
+  <h1><span class="accent">UrbanXAI</span> — Explainable Satellite-Image-Based Urban Building Analysis</h1>
+  <p class="sub">Building footprint segmentation with attention and explanation maps. Validation and test results are reported separately.</p>
+  <div class="tags">
+    <span class="tag">SpaceNet 2 &middot; Paris</span>
+    <span class="tag">EfficientNetB3 Attention U-Net</span>
+    <span class="tag">Validation &amp; test shown separately</span>
+  </div>
+</header>
+
+<h2>Key results</h2>
+<div class="grid">
+  <div class="card feature"><div class="label">Test Dice</div><div class="value">0.7502</div><small>Experiment 1, threshold 0.475</small></div>
+  <div class="card feature"><div class="label">Test IoU</div><div class="value">0.6002</div><small>Experiment 1, threshold 0.475</small></div>
+  <div class="card c-forest"><div class="label">Mean UECS</div><div class="value">0.4843</div><small>17 valid maps of 20</small></div>
+  <div class="card c-olive"><div class="label">Predicted components</div><div class="value">1,848</div><small>172 validation images</small></div>
+  <div class="card c-sage"><div class="label">Built-up percentage</div><div class="value">6.3532%</div><small>Validation predictions</small></div>
+  <div class="card c-forest"><div class="label">Mean density</div><div class="value">6.5577</div><small>Components per 10,000 pixels</small></div>
+</div>
+
+<h2>Interactive dashboard</h2>
+<div class="frame">
+  <div class="frame-bar"><i class="dot"></i><i class="dot"></i><i class="dot"></i><span>urbanxai_dashboard.html</span></div>
+  <iframe src="urbanxai_dashboard.html" title="UrbanXAI interactive dashboard"></iframe>
+</div>
+
+<h2>3D heatmaps</h2>
+<a class="btn" href="../3d_heatmaps/">Open 3D heatmap output folder &rarr;</a>
+
+<h2>2D comparisons and statistics</h2>
+<div class="groups">
+
+  <div class="group c-forest">
+    <h3><i></i>Segmentation comparisons</h3>
+    <div class="chips">
+      <a href="../2d_comparisons/segmentation_comparison_01.png">01</a>
+      <a href="../2d_comparisons/segmentation_comparison_02.png">02</a>
+      <a href="../2d_comparisons/segmentation_comparison_03.png">03</a>
+      <a href="../2d_comparisons/segmentation_comparison_04.png">04</a>
+      <a href="../2d_comparisons/segmentation_comparison_05.png">05</a>
+      <a href="../2d_comparisons/segmentation_comparison_06.png">06</a>
+      <a href="../2d_comparisons/segmentation_comparison_07.png">07</a>
+      <a href="../2d_comparisons/segmentation_comparison_08.png">08</a>
+      <a href="../2d_comparisons/segmentation_comparison_09.png">09</a>
+      <a href="../2d_comparisons/segmentation_comparison_10.png">10</a>
+    </div>
+  </div>
+
+  <div class="group c-olive">
+    <h3><i></i>Model performance</h3>
+    <div class="chips">
+      <a href="../2d_comparisons/experiment1_test_metrics.png">experiment1_test_metrics</a>
+      <a href="../2d_comparisons/test_model_comparison.png">test_model_comparison</a>
+      <a href="../2d_comparisons/validation_model_comparison.png">validation_model_comparison</a>
+    </div>
+  </div>
+
+  <div class="group c-sage">
+    <h3><i></i>Training history</h3>
+    <div class="chips">
+      <a href="../2d_comparisons/experiment_3_accuracy_history.png">experiment_3_accuracy_history</a>
+      <a href="../2d_comparisons/experiment_3_training_history.png">experiment_3_training_history</a>
+      <a href="../2d_comparisons/experiment_4_training_history.png">experiment_4_training_history</a>
+    </div>
+  </div>
+
+  <div class="group c-forest">
+    <h3><i></i>Urban statistics</h3>
+    <div class="chips">
+      <a href="../2d_comparisons/building_component_comparison.png">building_component_comparison</a>
+      <a href="../2d_comparisons/building_density_distribution.png">building_density_distribution</a>
+      <a href="../2d_comparisons/built_up_percentage.png">built_up_percentage</a>
+    </div>
+  </div>
+
+  <div class="group c-olive">
+    <h3><i></i>Explainability</h3>
+    <div class="chips">
+      <a href="../2d_comparisons/uecs_per_image.png">uecs_per_image</a>
+    </div>
+  </div>
+
+</div>
+
+<div class="note">
+  <b>Interpretation note:</b> UECS is a preliminary spatial-consistency measure, not a validated explanation-faithfulness score.
+  Connected components approximate building counts; density is pixel-based and is not buildings per square kilometre.
+</div>
+
+<footer>UrbanXAI &middot; SpaceNet 2 Paris &middot; EfficientNetB3 Attention U-Net</footer>
+
+</div>
+</body>
+</html>
